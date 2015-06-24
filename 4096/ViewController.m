@@ -34,18 +34,21 @@
     //创建方块
     [self createBlockWithState:1];
     [self.view addSubview:_mapView];
-    
     [self loadSave];
-    
-   
 }
 
 #pragma mark -加载存档记录
 -(void)loadSave{
-    NSString *path=[[NSBundle mainBundle]pathForResource:@"save.plist" ofType:nil];
-    //NSLog(@"%@",path);
-    NSMutableDictionary *saveArray=[[NSMutableDictionary alloc] initWithContentsOfFile:path];
-    _maxNum=[NSString stringWithFormat:@"%@",saveArray[@"item1"]].intValue;
+    //获取文档路径
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    //获取文件路径
+    NSString *path =[NSString  stringWithFormat:@"%@/%@",paths[0], @"save.rtf"];
+    //创建文件管理对象
+    NSFileManager *nfm  = [NSFileManager defaultManager];
+    //读取文件
+    NSData *data1=  [nfm contentsAtPath:path];
+    NSString *str=[[NSString alloc] initWithData:data1 encoding:NSUTF8StringEncoding];
+    _maxNum=str.intValue;
     _lableMaxCount.text=[NSString stringWithFormat:@"最高纪录：%i",_maxNum];
     [_lableMaxCount setFont:[UIFont fontWithName:@"Marker Felt" size:15]];
     
@@ -55,12 +58,16 @@
 -(void)setSave{
     int numCount=_lableCount.text.intValue;
     if (numCount>_maxNum) {
-        NSString *path=[[NSBundle mainBundle]pathForResource:@"save.plist" ofType:nil];
-        NSMutableDictionary *saveArray=[[NSMutableDictionary alloc] initWithContentsOfFile:path];
-        [saveArray setObject:[NSNumber numberWithInt:numCount] forKey:@"item1"];
-        
-        //NSLog(@"_____________本次分数：%i",numCount);
-        [saveArray writeToFile:path atomically:YES];
+        //获取文档路径
+        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        //获取文件路径
+        NSString *path =[NSString  stringWithFormat:@"%@/%@",paths[0], @"save.rtf"];
+        //创建文件管理对象
+        NSFileManager *nfm  = [NSFileManager defaultManager];
+        NSData *data = [[NSData alloc] init];//也可以通过简单方式赋值。
+        data = [[NSString stringWithFormat:@"%i",numCount] dataUsingEncoding:NSUTF8StringEncoding];//把内容与data联系起来，并且规定好编码格式为utf8
+        //写入文件
+       [nfm createFileAtPath:path contents:data attributes:nil];
     }
 }
 
@@ -103,7 +110,7 @@
             }else{
                 [btn setBackgroundColor:[BlockColor colorForLevel:0]];
                 [btn setTitleColor:[BlockColor colorForLevel:0] forState:0];
-                [btn setTitle:[NSString stringWithFormat:@"2"] forState:0];
+                [btn setTitle:[NSString stringWithFormat:@"0"] forState:0];
             }
             _blockArray=[_blockArray arrayByAddingObject:btn];
             [_mapView addSubview:btn];
@@ -325,16 +332,16 @@
 #pragma mark -创建滑动手势
 -(void)createSwipeGesture{
     //上滑手势
-    UISwipeGestureRecognizer *swiperUp=[[UISwipeGestureRecognizer alloc]initWithTarget:self action:@selector(swipeGestureDown)];
+    UISwipeGestureRecognizer *swiperUp=[[UISwipeGestureRecognizer alloc]initWithTarget:self action:@selector(swipeGestureUp)];
     swiperUp.direction=UISwipeGestureRecognizerDirectionUp;
     //下滑手势
-    UISwipeGestureRecognizer *swiperDown=[[UISwipeGestureRecognizer alloc]initWithTarget:self action:@selector(swipeGestureUp)];
+    UISwipeGestureRecognizer *swiperDown=[[UISwipeGestureRecognizer alloc]initWithTarget:self action:@selector(swipeGestureDown)];
     swiperDown.direction=UISwipeGestureRecognizerDirectionDown;
     //左滑手势
-    UISwipeGestureRecognizer *swiperLeft=[[UISwipeGestureRecognizer alloc]initWithTarget:self action:@selector(swipeGestureRight)];
+    UISwipeGestureRecognizer *swiperLeft=[[UISwipeGestureRecognizer alloc]initWithTarget:self action:@selector(swipeGestureLeft)];
     swiperLeft.direction=UISwipeGestureRecognizerDirectionLeft;
     //右滑手势
-    UISwipeGestureRecognizer *swiperRight=[[UISwipeGestureRecognizer alloc]initWithTarget:self action:@selector(swipeGestureLeft)];
+    UISwipeGestureRecognizer *swiperRight=[[UISwipeGestureRecognizer alloc]initWithTarget:self action:@selector(swipeGestureRight)];
     swiperRight.direction=UISwipeGestureRecognizerDirectionRight;
     //添加手势
     [_mapView addGestureRecognizer:swiperUp];

@@ -3,6 +3,6 @@
 <plist version="1.0">
 <dict>
 	<key>item1</key>
-	<integer>80</integer>
+	<string>80</string>
 </dict>
 </plist>
